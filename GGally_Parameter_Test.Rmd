@@ -1,0 +1,106 @@
+---
+title: "GGally Parameter Test"
+author: "Keyan Huang"
+date: "2022-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Environment Preparation
+
+**Dataset `iris` will be used as source for `ggpairs` plotting.**
+
+Note: `iris` is a dataset included in base-R.
+
+```{r}
+library("tidyverse")
+library("GGally")
+
+theme_set(theme_bw(base_size = 15) + theme(legend.position="bottom"))
+
+## For readability, the dataset 'iris' is saved to variable 'data'
+data <- tibble(iris)
+head(iris)
+```
+
+## Trials of GGpairs Parameters
+
+**For R-documentation, see [ggpairs: ggpairs - A ggplot2 generalized pairs plot](https://www.rdocumentation.org/packages/GGally/versions/1.5.0/topics/ggpairs)**
+
+1. Standard usage from Singmann's lectures
+
+```{r}
+ggpairs(data, columns = 1:4, lower = list(continuous = wrap("points", alpha = 0.05)))
+```
+
+2. Change `lower` to `upper`
+
+```{r}
+ggpairs(data, columns = 1:4, upper = list(continuous = wrap("points", alpha = 0.05)))
+```
+
+3. Combine `lower` and `upper`, and adjust other parameters to discriminate between `upper` and `lower`
+
+```{r}
+## lower alpha = 0.2, upper alpha = 0.05
+ggpairs(data, columns = 1:4, lower = list(continuous = wrap("points", alpha = 0.2)), upper = list(continuous = wrap("points", alpha = 0.05)))
+
+## lower alpha = 0.05, upper alpha = 0.2
+ggpairs(data, columns = 1:4, lower = list(continuous = wrap("points", alpha = 0.05)), upper = list(continuous = wrap("points", alpha = 0.2)))
+
+## lower "density" (alpha = 0.5), upper "smooth"
+ggpairs(data, columns = 1:4, lower = list(continuous = wrap("density", alpha = 0.5)), upper = list(continuous = wrap("smooth", alpha = 0.05)))
+
+## lower "cor" (alpha =), upper "blank"
+ggpairs(data, columns = 1:4, lower = list(continuous = wrap("cor", alpha = 0.5)), upper = list(continuous = wrap("blank", alpha = 0.05)))
+```
+
+> Based on 2 & 3, `upper` and `lower` probably define respectively the plot properties on the upper-right and the lower-left; if `lower` is not explicitly defined (as in 2), it will be set as `list(continuous = wrap("points", alpha = 1))`, which draws an intransparent scatterplot; if `upper` is not explicitly defined (as in 1), it will be set as `list(continuous = wrap("cor", alpha = 1))`, which shows the correlation coefficients.
+
+4. Change `continuous` to `combo` using columns from 3 to 5 (only 5th column `Species` is categorical so `discrete` cannot be used)
+
+Note: `continuous` is for continuous DV & IV, `combo` is for one continuous variable and one categorical variable, `discrete` is for categorical DV & IV.
+
+```{r}
+## alpha = 0.2
+## using option "box"
+ggpairs(data, columns = 3:5, lower = list(combo = wrap("box", alpha = 0.2)))
+
+## using option "dot"
+ggpairs(data, columns = 3:5, lower = list(combo = wrap("dot", alpha = 0.2)))
+
+## using option "facetdensity"
+ggpairs(data, columns = 3:5, lower = list(combo = wrap("facetdensity", alpha = 0.2)))
+
+## using option "denstrip"
+ggpairs(data, columns = 3:5, lower = list(combo = wrap("denstrip", alpha = 0.2)))
+```
+
+5. Combine `continuous` and `combo` using columns from 3 to 5
+
+```{r}
+## alpha = 0.2
+## place 'continuous' and 'combo' ('box') in different places
+ggpairs(data, columns = 3:5, lower = list(continuous = wrap("points", alpha = 0.05)), upper = list(combo = wrap("box", alpha = 0.2)))
+
+## place 'continuous' and 'combo' in one place ('lower')
+ggpairs(data, columns = 3:5, lower = list(continuous = wrap("points", alpha = 0.05), combo = wrap("box", alpha = 0.2)))
+
+```
+
+6. Place `continuous` and `combo` out of `wrap()` (and thus there will be no `alpha`)
+
+```{r}
+## place 'continuous' and 'combo' ('box') in different places
+ggpairs(data, columns = 3:5, lower = list(continuous = "points"), upper = list(combo = "box"))
+
+## place 'continuous' and 'combo' in one place ('lower')
+ggpairs(data, columns = 3:5, lower = list(continuous = "points", combo = "box"))
+```
+
+> Based on 4 & 5, `continuous`, `combo` and `discrete` are probably different approaches of wrapping-up the data before final plotting; by placing them after function `wrap()`, we are able to adjust the graphic properties (e.g. transparency by `alpha`) of the sub-plots.
+
+**This is the end of the document.**
